@@ -10,15 +10,18 @@
     <section class="columns">
       <div class="column is-half is-offset-one-quarter">
         <div v-for="(message, id) in messages" v-bind:key="id">
-          <b-message
-            :title="message.title"
-            type="is-info"
-            has-icon
-            aria-close-label="Close message"
-          >
-            {{ message.description }}
-            <div>{{ message.name }}({{ message.updatedAt }})</div>
-          </b-message>
+          <div class="box mb-2">
+            <div class="media-content">
+              <div class="content">
+                <strong>{{ message.title }}</strong><br>
+                {{ message.description }}
+                <div class="has-text-right is-size-7">
+                  {{ message.name }}
+                  <small>{{ message.updatedAt }}</small>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
