@@ -28,11 +28,19 @@
           <b-input v-model="title" name="title" expanded></b-input>
         </b-field>
         <b-field label-position="on-border" label="本文">
-          <b-input v-model="description" name="description" maxlength="200" type="textarea" expanded></b-input>
+          <b-input
+            v-model="description"
+            name="description"
+            maxlength="200"
+            type="textarea"
+            expanded
+          ></b-input>
         </b-field>
         <b-field>
           <p class="control">
-            <button class="button is-info" v-on:click="createMessage()">投稿</button>
+            <button class="button is-info" v-on:click="createMessage()">
+              投稿
+            </button>
           </p>
         </b-field>
       </div>
