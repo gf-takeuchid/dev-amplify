@@ -1,33 +1,42 @@
 <template>
   <div>
-    <h1>チャット</h1>
-    <div class="private-notes-area">
-      <div v-for="(message, id) in messages" v-bind:key="id">
-        <p>title:{{ message.title }}</p>
-        <p>name:{{ message.name }}</p>
-        <p>description:{{ message.description }}</p>
+    <section class="section">
+      <div class="container">
+        <h1 class="title">
+          チャット
+        </h1>
       </div>
-    </div>
-    <div id="chat-form">
-      <textarea
-        v-model="title"
-        name="title"
-        class="form"
-        placeholder="title"
-      ></textarea
-      ><br />
-      <textarea
-        v-model="description"
-        name="description"
-        class="form"
-        placeholder="description"
-      ></textarea
-      ><br />
-      <button class="submit" v-on:click="createMessage()">投稿</button>
-    </div>
-    <div>
-      <amplify-sign-out button-text="ログアウト"></amplify-sign-out>
-    </div>
+    </section>
+    <section class="columns">
+      <div class="column is-half is-offset-one-quarter">
+        <div v-for="(message, id) in messages" v-bind:key="id">
+          <b-message
+            :title="message.title"
+            type="is-info"
+            has-icon
+            aria-close-label="Close message"
+          >
+            {{ message.description }}
+            <div>{{ message.name }}({{ message.updatedAt }})</div>
+          </b-message>
+        </div>
+      </div>
+    </section>
+    <section class="columns">
+      <div class="column is-4 is-offset-one-quarter">
+        <b-field label-position="on-border" label="タイトル">
+          <b-input v-model="title" name="title" expanded></b-input>
+        </b-field>
+        <b-field label-position="on-border" label="本文">
+          <b-input v-model="description" name="description" maxlength="200" type="textarea" expanded></b-input>
+        </b-field>
+        <b-field>
+          <p class="control">
+            <button class="button is-info" v-on:click="createMessage()">投稿</button>
+          </p>
+        </b-field>
+      </div>
+    </section>
   </div>
 </template>
 <script>
@@ -46,11 +55,15 @@ export default {
       name: "",
       limit: 10,
       message: null,
-      messages: []
+      messages: [],
+      subscribe: {}
     };
   },
   mounted: function() {
     this.setUserName().then(this.displayNewMessage());
+  },
+  beforeDestroy() {
+    this.subscribe.unsubscribe();
   },
   methods: {
     setUserName: async function() {
@@ -80,10 +93,10 @@ export default {
       this.messages = _.orderBy(
         messages.data.listMessages.items,
         "updatedAt",
-        "desc"
+        "asc"
       );
 
-      API.graphql(
+      this.subscribe = API.graphql(
         graphqlOperation(onCreateMessage, {
           limit: this.limit,
           name: this.name
@@ -92,7 +105,7 @@ export default {
         next: eventData => {
           const message = eventData.value.data.onCreateMessage;
           const messages = [...this.messages, message];
-          this.messages = _.orderBy(messages, "updatedAt", "desc");
+          this.messages = _.orderBy(messages, "updatedAt", "asc");
         }
       });
     }

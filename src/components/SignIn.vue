@@ -16,7 +16,7 @@ export default {
   data() {
     return {
       formFields: [
-        { type: "nickname", label: 'ニックネーム', },
+        { type: "nickname", label: "ニックネーム" },
         { type: "password" },
         { type: "email" }
       ]
