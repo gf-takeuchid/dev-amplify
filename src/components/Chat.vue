@@ -1,19 +1,20 @@
 <template>
   <div>
-    <section class="section">
-      <div class="container">
+    <section>
+      <div class="container is-fluid">
         <h1 class="title">
           チャット
         </h1>
       </div>
     </section>
-    <section class="columns">
-      <div class="column is-half is-offset-one-quarter">
+    <section class="section columns is-centered">
+      <div class="column is-half">
         <div v-for="(message, id) in messages" v-bind:key="id">
-          <div class="box mb-2">
+          <div class="box mb-3">
             <div class="media-content">
               <div class="content">
-                <strong>{{ message.title }}</strong><br>
+                <strong>{{ message.title }}</strong
+                ><br />
                 {{ message.description }}
                 <div class="has-text-right is-size-7">
                   {{ message.name }}
@@ -25,12 +26,12 @@
         </div>
       </div>
     </section>
-    <section class="columns">
-      <div class="column is-4 is-offset-one-quarter">
-        <b-field label-position="on-border" label="タイトル">
+    <section class="columns is-centered">
+      <div class="mb-6 column is-two-thirds">
+        <b-field grouped label-position="on-border" label="タイトル">
           <b-input v-model="title" name="title" expanded></b-input>
         </b-field>
-        <b-field label-position="on-border" label="本文">
+        <b-field grouped label-position="on-border" label="本文">
           <b-input
             v-model="description"
             name="description"
@@ -39,13 +40,12 @@
             expanded
           ></b-input>
         </b-field>
-        <b-field>
-          <p class="control">
-            <button class="button is-info" v-on:click="createMessage()">
-              投稿
-            </button>
-          </p>
-        </b-field>
+        <button
+          class="button is-info is-light is-medium is-fullwidth"
+          v-on:click="createMessage()"
+        >
+          投稿
+        </button>
       </div>
     </section>
   </div>
