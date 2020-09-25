@@ -2,9 +2,9 @@
   <div>
     <amplify-authenticator username-alias="email">
       <amplify-sign-up
-        slot="sign-up"
-        username-alias="email"
-        :form-fields.prop="formFields"
+          slot="sign-up"
+          username-alias="email"
+          :form-fields.prop="formFields"
       ></amplify-sign-up>
     </amplify-authenticator>
   </div>

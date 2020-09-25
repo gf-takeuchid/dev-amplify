@@ -13,12 +13,14 @@ function getUser() {
   return Auth.currentAuthenticatedUser()
     .then(data => {
       if (data && data.signInUserSession) {
-        store.commit("setUser", data);
+        store.commit("setUser", data.username);
+        store.commit("setAuthState", true);
         return data;
       }
     })
     .catch(() => {
       store.commit("setUser", null);
+      store.commit("setAuthState", false);
       return null;
     });
 }

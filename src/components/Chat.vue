@@ -3,7 +3,7 @@
     <section>
       <div class="container is-fluid">
         <h1 class="title">
-          チャット
+          投稿画面
         </h1>
       </div>
     </section>
