@@ -8,6 +8,7 @@ export const onCreateMessage = /* GraphQL */ `
       name
       title
       description
+      image
       createdAt
       updatedAt
     }
@@ -20,6 +21,7 @@ export const onUpdateMessage = /* GraphQL */ `
       name
       title
       description
+      image
       createdAt
       updatedAt
     }
@@ -32,6 +34,7 @@ export const onDeleteMessage = /* GraphQL */ `
       name
       title
       description
+      image
       createdAt
       updatedAt
     }

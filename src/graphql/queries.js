@@ -8,6 +8,7 @@ export const getMessage = /* GraphQL */ `
       name
       title
       description
+      image
       createdAt
       updatedAt
     }
@@ -25,6 +26,7 @@ export const listMessages = /* GraphQL */ `
         name
         title
         description
+        image
         createdAt
         updatedAt
       }

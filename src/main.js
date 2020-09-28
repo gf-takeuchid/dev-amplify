@@ -8,9 +8,12 @@ import Amplify from "aws-amplify";
 import awsconfig from "./aws-exports";
 import Buefy from "buefy";
 import "buefy/dist/buefy.css";
+import "@fortawesome/fontawesome-free/css/all.css";
 
 Vue.config.productionTip = false;
-Vue.use(Buefy);
+Vue.use(Buefy, {
+  defaultIconPack: 'fas',
+});
 Amplify.configure(awsconfig);
 
 new Vue({

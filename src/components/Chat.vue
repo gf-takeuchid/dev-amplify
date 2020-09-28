@@ -11,35 +11,69 @@
       <div class="column is-half">
         <div v-for="(message, id) in messages" v-bind:key="id">
           <div class="box mb-3">
-            <div class="media-content">
-              <div class="content">
-                <strong>{{ message.title }}</strong
-                ><br />
-                {{ message.description }}
-                <div class="has-text-right is-size-7">
-                  {{ message.name }}
-                  <small>{{ message.updatedAt }}</small>
+            <article class="media">
+              <div class="media-left">
+                <amplify-s3-image :img-key="message.image" level="protected" />
+              </div>
+              <div class="media-content">
+                <div class="content">
+                  <strong>{{ message.title }}</strong
+                  ><br />
+                  {{ message.description }}
+                  <div class="has-text-right is-size-7">
+                    {{ message.name }}
+                    <small>{{ message.updatedAt }}</small>
+                  </div>
                 </div>
               </div>
-            </div>
+            </article>
           </div>
         </div>
       </div>
     </section>
     <section class="columns is-centered">
       <div class="mb-6 column is-two-thirds">
-        <b-field grouped label-position="on-border" label="タイトル">
-          <b-input v-model="title" name="title" expanded></b-input>
-        </b-field>
-        <b-field grouped label-position="on-border" label="本文">
-          <b-input
-            v-model="description"
-            name="description"
-            maxlength="200"
-            type="textarea"
-            expanded
-          ></b-input>
-        </b-field>
+        <div class="columns">
+          <div class="column">
+            <b-field>
+              <b-upload
+                drag-drop
+                :value="image"
+                class="file-label"
+                @input="uploadFile"
+              >
+                <section class="section">
+                  <div class="content has-text-centered">
+                    <p>
+                      <b-icon icon="upload" size="is-large"> </b-icon>
+                    </p>
+                    <p>Drop your files here or click to upload</p>
+                  </div>
+                </section>
+              </b-upload>
+            </b-field>
+            <div class="tags">
+                <span class="tag is-primary" v-if="image">
+                  {{ image.name }}
+                </span>
+            </div>
+          </div>
+          <div class="column">
+            <b-field grouped label-position="on-border" label="タイトル">
+              <b-input v-model="title" name="title" expanded></b-input>
+            </b-field>
+            <b-field grouped label-position="on-border" label="本文">
+              <b-input
+                v-model="description"
+                name="description"
+                maxlength="500"
+                type="textarea"
+                rows="10"
+                expanded
+              ></b-input>
+            </b-field>
+          </div>
+        </div>
         <button
           class="button is-info is-light is-medium is-fullwidth"
           v-on:click="createMessage()"
@@ -51,7 +85,7 @@
   </div>
 </template>
 <script>
-import { API, Auth, graphqlOperation } from "aws-amplify";
+import { API, Auth, graphqlOperation, Storage } from "aws-amplify";
 import { createMessage } from "@/graphql/mutations";
 import { listMessages } from "@/graphql/queries";
 import { onCreateMessage } from "@/graphql/subscriptions";
@@ -67,7 +101,8 @@ export default {
       limit: 10,
       message: null,
       messages: [],
-      subscribe: {}
+      subscribe: {},
+      image: null
     };
   },
   mounted: function() {
@@ -77,6 +112,18 @@ export default {
     this.subscribe.unsubscribe();
   },
   methods: {
+    uploadFile(file) {
+      console.log(file);
+      if (file == undefined) {
+        return;
+      }
+      this.image = file;
+      Storage.put(file.name, file, { level: "protected"})
+        .then(result => {
+          console.log(result);
+        })
+        .catch(err => console.log(err));
+    },
     setUserName: async function() {
       this.name = (await Auth.currentUserInfo()).attributes.nickname;
     },
@@ -85,11 +132,13 @@ export default {
       const newMessage = {
         name: this.name,
         description: this.description,
-        title: this.title
+        title: this.title,
+        image: this.image.name
       };
       try {
         this.title = "";
         this.description = "";
+        this.image = null;
         await API.graphql(
           graphqlOperation(createMessage, { input: newMessage })
         );
@@ -123,3 +172,10 @@ export default {
   }
 };
 </script>
+
+<style>
+amplify-s3-image {
+  --height: 100px;
+  --width: 100px;
+}
+</style>
