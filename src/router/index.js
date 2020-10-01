@@ -1,6 +1,6 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Chat from "@/components/Chat";
+import Message from "@/components/Message";
 import SignIn from "@/components/SignIn.vue";
 import { Auth } from "aws-amplify";
 import store from "@/store/index.js";
@@ -28,8 +28,8 @@ function getUser() {
 const routes = [
   {
     path: "/",
-    name: "chat",
-    component: Chat,
+    name: "message",
+    component: Message,
     meta: { requireAuth: true }
   },
   {

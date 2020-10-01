@@ -26,6 +26,12 @@
                   </div>
                 </div>
               </div>
+              <div class="media-right">
+                <button
+                  class="delete"
+                  @click="deleteMessage(message.id, message.title)"
+                ></button>
+              </div>
             </article>
           </div>
         </div>
@@ -53,9 +59,9 @@
               </b-upload>
             </b-field>
             <div class="tags">
-                <span class="tag is-primary" v-if="image">
-                  {{ image.name }}
-                </span>
+              <span class="tag is-primary" v-if="image">
+                {{ image.name }}
+              </span>
             </div>
           </div>
           <div class="column">
@@ -86,67 +92,97 @@
 </template>
 <script>
 import { API, Auth, graphqlOperation, Storage } from "aws-amplify";
-import { createMessage } from "@/graphql/mutations";
+import { createMessage, deleteMessage } from "@/graphql/mutations";
 import { listMessages } from "@/graphql/queries";
-import { onCreateMessage } from "@/graphql/subscriptions";
+import { onCreateMessage, onDeleteMessage } from "@/graphql/subscriptions";
 import _ from "lodash";
 
 export default {
-  name: "Chat",
+  name: "Message",
   data() {
     return {
       title: "",
       description: "",
+      image: null,
+      imageName: "",
       name: "",
       limit: 10,
-      message: null,
       messages: [],
-      subscribe: {},
-      image: null
+      subscribe: {}
     };
   },
-  mounted: function() {
-    this.setUserName().then(this.displayNewMessage());
+  mounted() {
+    this.setUserName().then(this.reloadMessage());
+    this.subscribe = API.graphql(graphqlOperation(onCreateMessage)).subscribe({
+      next: () => this.reloadMessage()
+    });
+
+    this.subscribe = API.graphql(graphqlOperation(onDeleteMessage)).subscribe({
+      next: () => this.reloadMessage()
+    });
   },
   beforeDestroy() {
     this.subscribe.unsubscribe();
   },
   methods: {
     uploadFile(file) {
-      console.log(file);
-      if (file == undefined) {
+      if (file === undefined) {
+        this.$buefy.dialog.alert({
+          message: "画像が認識できませんでした。",
+          type: "is-info"
+        });
         return;
       }
-      this.image = file;
-      Storage.put(file.name, file, { level: "protected"})
+      this.imageName = file.name;
+      Storage.put(file.name, file, { level: "protected" })
         .then(result => {
           console.log(result);
         })
         .catch(err => console.log(err));
     },
-    setUserName: async function() {
+    async setUserName() {
       this.name = (await Auth.currentUserInfo()).attributes.nickname;
     },
-    createMessage: async function() {
-      if (this.title === "") return;
+    async deleteMessage(id, title) {
+      await this.$buefy.dialog.confirm({
+        message: "記事を完全に削除しますか？",
+        type: "is-info",
+        onConfirm() {
+          API.graphql(graphqlOperation(deleteMessage, { input: { id } }));
+          this.$buefy.snackbar.open(`「${title}」の記事を削除しました`);
+        }
+      });
+    },
+    async createMessage() {
+      if (this.title === "") {
+        this.$buefy.dialog.alert({
+          message: "タイトルは入力必須です。",
+          type: "is-info"
+        });
+        return;
+      }
       const newMessage = {
         name: this.name,
         description: this.description,
         title: this.title,
-        image: this.image.name
+        image: this.imageName
       };
       try {
         this.title = "";
         this.description = "";
         this.image = null;
+        this.imageName = "";
         await API.graphql(
           graphqlOperation(createMessage, { input: newMessage })
         );
+        this.$buefy.snackbar.open(
+          `「${newMessage.title}」の記事を投稿しました`
+        );
       } catch (error) {
-        error;
+        console.log(error);
       }
     },
-    displayNewMessage: async function() {
+    async reloadMessage() {
       let messages = await API.graphql(
         graphqlOperation(listMessages, { limit: this.limit })
       );
@@ -155,19 +191,6 @@ export default {
         "updatedAt",
         "asc"
       );
-
-      this.subscribe = API.graphql(
-        graphqlOperation(onCreateMessage, {
-          limit: this.limit,
-          name: this.name
-        })
-      ).subscribe({
-        next: eventData => {
-          const message = eventData.value.data.onCreateMessage;
-          const messages = [...this.messages, message];
-          this.messages = _.orderBy(messages, "updatedAt", "asc");
-        }
-      });
     }
   }
 };
