@@ -59,8 +59,8 @@
               </b-upload>
             </b-field>
             <div class="tags">
-              <span class="tag is-primary" v-if="image">
-                {{ image.name }}
+              <span class="tag is-primary" v-if="imageName">
+                {{ imageName }}
               </span>
             </div>
           </div>
@@ -105,7 +105,7 @@ export default {
       description: "",
       image: null,
       imageName: "",
-      name: "",
+      userName: "",
       limit: 10,
       messages: [],
       subscribe: {}
@@ -141,14 +141,14 @@ export default {
         .catch(err => console.log(err));
     },
     async setUserName() {
-      this.name = (await Auth.currentUserInfo()).attributes.nickname;
+      this.userName = (await Auth.currentUserInfo()).attributes.nickname;
     },
-    async deleteMessage(id, title) {
-      await this.$buefy.dialog.confirm({
+    deleteMessage(id, title) {
+      this.$buefy.dialog.confirm({
         message: "記事を完全に削除しますか？",
         type: "is-info",
-        onConfirm() {
-          API.graphql(graphqlOperation(deleteMessage, { input: { id } }));
+        onConfirm: async () => {
+          await API.graphql(graphqlOperation(deleteMessage, { input: { id } }));
           this.$buefy.snackbar.open(`「${title}」の記事を削除しました`);
         }
       });
@@ -162,7 +162,7 @@ export default {
         return;
       }
       const newMessage = {
-        name: this.name,
+        name: this.userName,
         description: this.description,
         title: this.title,
         image: this.imageName
